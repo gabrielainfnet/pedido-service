@@ -1,5 +1,6 @@
 package com.ecommerce.pedido.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,5 +20,6 @@ public class Produto {
 
     private BigDecimal preco;
 
-    private int quantidade;
+    @JsonIgnore
+    private int quantidadeDisponivel;
 }
