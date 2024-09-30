@@ -6,18 +6,24 @@ import com.ecommerce.pedido.model.Produto;
 import com.ecommerce.pedido.repository.PedidoRepository;
 import com.ecommerce.pedido.service.PedidoService;
 import com.ecommerce.pedido.service.ProdutoService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PedidoServiceImpl implements PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final ProdutoService produtoService;
+
+    private static List<Pedido> CACHE = new ArrayList<>();
 
     @Override
     public Pedido create(Pedido pedido) {
@@ -29,18 +35,29 @@ public class PedidoServiceImpl implements PedidoService {
         return pedidoRepository.findById(id);
     }
 
+
     @Override
+    @CircuitBreaker(name = "produtoService", fallbackMethod = "buscarNoCache")
     public List<Pedido> findAll() {
         List<Pedido> pedidos = pedidoRepository.findAll();
         pedidos.forEach(pedido -> {
             List<ItemPedido> itensPedido = pedido.getItensPedido();
             itensPedido.forEach(itemPedido -> {
-                Produto produto = produtoService.obterProdutoPorId(itemPedido.getProdutoId());
-                itemPedido.setProduto(produto);
+                try {
+                    Produto produto = produtoService.obterProdutoPorId(itemPedido.getProdutoId());
+                    itemPedido.setProduto(produto);
+                } catch (Exception e) {
+                    log.error("Erro ao buscar produto: {}", e.getMessage());
+                }
             });
+            CACHE.add(pedido);
         });
-
         return pedidos;
+    }
+
+    private List<Pedido> buscarNoCache(Throwable t) {
+        log.info("Buscando no cache");
+        return new ArrayList<>(CACHE);
     }
 
     @Override

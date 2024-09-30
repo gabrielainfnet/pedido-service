@@ -32,4 +32,8 @@ spring:
       schema-locations: classpath:/schema.sql
       data-locations: classpath:/data.sql
 
-
+resilience4j:
+  circuitbreaker:
+    instances:
+      produtoService:
+        registerHealthIndicator: true

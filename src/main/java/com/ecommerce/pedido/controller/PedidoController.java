@@ -3,6 +3,7 @@ package com.ecommerce.pedido.controller;
 import com.ecommerce.pedido.model.Pedido;
 import com.ecommerce.pedido.service.PedidoService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,11 +13,13 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/")
 @RequiredArgsConstructor
+@Slf4j
 public class PedidoController {
     private final PedidoService pedidoService;
 
     @GetMapping
     public ResponseEntity<List<Pedido>> findAll() {
+        log.info("Buscando todos os pedidos");
         return ResponseEntity.ok(pedidoService.findAll());
     }
 
@@ -38,6 +41,7 @@ public class PedidoController {
 
     @PostMapping
     public ResponseEntity<Pedido> save(@RequestBody Pedido pedido) {
+        log.info("Salvando pedido: {}", pedido);
         Pedido saved = pedidoService.create(pedido);
         return ResponseEntity.ok(saved);
     }
