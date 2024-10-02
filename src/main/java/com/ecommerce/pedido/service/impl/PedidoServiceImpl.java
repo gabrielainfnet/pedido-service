@@ -1,9 +1,11 @@
 package com.ecommerce.pedido.service.impl;
 
 import com.ecommerce.pedido.model.ItemPedido;
+import com.ecommerce.pedido.model.NotificacaoPedido;
 import com.ecommerce.pedido.model.Pedido;
 import com.ecommerce.pedido.model.Produto;
 import com.ecommerce.pedido.repository.PedidoRepository;
+import com.ecommerce.pedido.service.NotificacaoService;
 import com.ecommerce.pedido.service.PedidoService;
 import com.ecommerce.pedido.service.ProdutoService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -22,11 +24,14 @@ public class PedidoServiceImpl implements PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final ProdutoService produtoService;
+    private final NotificacaoService notificacaoService;
 
     private static List<Pedido> CACHE = new ArrayList<>();
 
     @Override
     public Pedido create(Pedido pedido) {
+        NotificacaoPedido notificacaoPedido = new NotificacaoPedido(pedido.getId(), pedido.getCliente().getEmail(), pedido.getStatus());
+        notificacaoService.enviarNotificacao(notificacaoPedido);
         return pedidoRepository.save(pedido);
     }
 

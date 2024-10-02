@@ -22,6 +22,8 @@ public class Cliente {
 
     private String nome;
 
+    private String email;
+
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Endereco> enderecos = new ArrayList<>();
